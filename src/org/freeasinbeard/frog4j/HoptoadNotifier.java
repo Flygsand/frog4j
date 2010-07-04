@@ -77,6 +77,11 @@ public class HoptoadNotifier {
                 }
                 doc.end() // end backtrace
             .end() // end error
+            .begin("request")
+                .begin("url").cdata(notice.request().url()).end()
+                .begin("component").cdata(notice.request().component()).end()
+                .begin("action").cdata(notice.request().action()).end()
+            .end() // end request
             .begin("server-environment")
                 .begin("environment-name").cdata(environment).end()
             .end() // end server-environment
