@@ -14,6 +14,7 @@
 
     <!-- IVY PROPERTIES -->
     <property name="ivy.install.version" value="2.1.0" />
+	<property name="ivy.checksums" value="" />
 
     <condition property="ivy.home" value="${env.IVY_HOME}">
         <isset property="env.IVY_HOME" />

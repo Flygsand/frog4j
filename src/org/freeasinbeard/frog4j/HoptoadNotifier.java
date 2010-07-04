@@ -52,25 +52,9 @@ public class HoptoadNotifier {
             throw new HttpException(responseCode, responseMessage);
         
         return;
-        
     }
     
-    private static HttpURLConnection buildAPIConnection() throws IOException { 
-        try {
-            URL apiURL = new URL("http://hoptoadapp.com/notifier_api/v2/notices");
-            HttpURLConnection conn = (HttpURLConnection) apiURL.openConnection();
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-type", "text/xml");
-            conn.setRequestProperty("Accept", "text/xml, application/xml");
-            conn.setRequestMethod("POST");
-            return conn;
-        } catch (MalformedURLException e) { 
-            assert false: e;
-            return null;
-        }
-    }
-    
-    private XmlDocument buildRequestXml(HoptoadNotice notice) {
+    protected XmlDocument buildRequestXml(HoptoadNotice notice) {
         XmlDocument doc = new XmlDocument();
         doc.begin("notice")
             .attr("version", "2.0")
@@ -100,5 +84,19 @@ public class HoptoadNotifier {
     
         return doc;
     }
-        
+    
+    private static HttpURLConnection buildAPIConnection() throws IOException { 
+        try {
+            URL apiURL = new URL("http://hoptoadapp.com/notifier_api/v2/notices");
+            HttpURLConnection conn = (HttpURLConnection) apiURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-type", "text/xml");
+            conn.setRequestProperty("Accept", "text/xml, application/xml");
+            conn.setRequestMethod("POST");
+            return conn;
+        } catch (MalformedURLException e) { 
+            assert false: e;
+            return null;
+        }
+    } 
 }
