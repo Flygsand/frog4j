@@ -12,7 +12,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Random;
 
-import org.freeasinbeard.util.xml.XmlDocument;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -221,9 +220,17 @@ public class TestXmlDocument {
                 .begin("cdatatag").cdata("\"'<>& are escaped").end()
             .end();
         
-        MockOutputStream os = new MockOutputStream();
-        doc.write(os);
-        assertTrue("OutputStream passed to write() was closed", os.isOpen());
+        doc.write(new OutputStream() {
+            @Override
+            public void close() throws IOException {
+                Assert.fail("OutputStream passed to write() was closed");
+            }
+
+            @Override
+            public void write(int b) throws IOException {}
+            
+        });
+        
     }
     
     private File tempFile() {
@@ -251,27 +258,5 @@ public class TestXmlDocument {
     
     private void failExceptionNotThrown(Class<? extends Exception> klass) {
         Assert.fail(String.format("Exception of class %s was not thrown", klass.getName()));
-    }
-}
-
-class MockOutputStream extends OutputStream {
-    private boolean isOpen = true;
-    
-    public MockOutputStream() {
-        super();
-        isOpen = true;
-    }
-    
-    @Override
-    public void close() throws IOException {
-        super.close();
-        isOpen = false;
-    }
-
-    @Override
-    public void write(int b) throws IOException {}
-
-    public boolean isOpen() {
-        return isOpen;
     }
 }
