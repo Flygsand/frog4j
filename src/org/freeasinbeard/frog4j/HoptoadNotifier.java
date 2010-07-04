@@ -6,7 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.log4j.spi.LoggingEvent;
-import org.freeasinbeard.frog4j.util.xml.XmlDocument;
+import org.freeasinbeard.util.xml.XmlDocument;
 
 public class HoptoadNotifier {
     private static final String NAME = "frog4j";

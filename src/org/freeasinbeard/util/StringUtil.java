@@ -1,4 +1,4 @@
-package org.freeasinbeard.frog4j.util;
+package org.freeasinbeard.util;
 
 import java.util.Iterator;
 

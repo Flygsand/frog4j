@@ -1,4 +1,4 @@
-package org.freeasinbeard.frog4j.util.xml;
+package org.freeasinbeard.util.xml;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
-import org.freeasinbeard.frog4j.util.StringUtil;
+import org.freeasinbeard.util.StringUtil;
 
 /*  EXAMPLE
  *  ========

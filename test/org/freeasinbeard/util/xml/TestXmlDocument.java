@@ -1,4 +1,4 @@
-package org.freeasinbeard.frog4j.util.xml;
+package org.freeasinbeard.util.xml;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Random;
 
-import org.freeasinbeard.frog4j.util.xml.XmlDocument;
+import org.freeasinbeard.util.xml.XmlDocument;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
