@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 import org.freeasinbeard.frog4j.util.StringUtil;
 
@@ -46,6 +47,7 @@ public class XmlDocument {
     
     private Charset charset;
     
+    private static Pattern identifierPattern = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9\\._-]*$");
     private Stack<String> unendedTags;
     private StringBuilder buffer;
     private boolean incompleteBeginTag;
@@ -55,49 +57,58 @@ public class XmlDocument {
         unendedTags = new Stack<String>();
         buffer = new StringBuilder();
         incompleteBeginTag = false;
-        append("<?xml version=\"1.0\" encoding=\"", charset.name(), "\" ?>");
     }
     
     public XmlDocument() {
         this(Charset.defaultCharset());
     }
     
-    public XmlDocument begin(String tagname) {
-        if (tagname.isEmpty())
-            throw new IllegalArgumentException("Missing tagname");
+    public XmlDocument begin(String tagName) {
+        if (tagName == null)
+            throw new IllegalArgumentException("Tag name cannot be null");
         
+        if (buffer.length() == 0)
+            append("<?xml version=\"1.0\" encoding=\"", charset.name(), "\"?>");
+        else if (unendedTags.isEmpty())
+            throw new IllegalStateException("Multiple root tags are not allowed");
+        
+        if (!isValidIdentifier(tagName))
+            throw new IllegalArgumentException(errorInContext("Invalid tag name \"%s\"", tagName));
+
         if (incompleteBeginTag)
             completeBeginTag(false);
             
-        unendedTags.push(tagname);
+        unendedTags.push(tagName);
         incompleteBeginTag = true;
-        append("<", tagname);
+        append("<", tagName);
         return this;
     }
     
     public <T> XmlDocument attr(String name, T value) {
-        if (name == null || value == null)
-            throw new IllegalArgumentException("Missing attribute name and/or value");
+        if (name == null)
+            throw new IllegalArgumentException("Attribute name cannot be null");
+        
+        if (!isValidIdentifier(name))
+            throw new IllegalArgumentException(errorInContext("Invalid attribute name \"%s\"", name));
             
         if (!incompleteBeginTag) 
-            throw new MalformedXmlDocumentException("Cannot use attr() here");
+            throw new IllegalStateException(errorInContext("attr() can only be applied to begin()"));
         
-        append(" ", name,  "=", "\"", value, "\"");
+        append(" ", name,  "=", "\"", escape(value), "\"");
         return this;
     }
     
-    @SuppressWarnings("unchecked")
     public <T> XmlDocument cdata(T cdata) {
         if (incompleteBeginTag)
             completeBeginTag(false);
         
-        append(cdata);
+        append(escape(cdata));
         return this;
     }
     
     public XmlDocument end() {
         if (unendedTags.isEmpty())
-            throw new MalformedXmlDocumentException("Trailing end() has no matching begin()");
+            throw new IllegalStateException("Trailing end() has no matching begin()");
         
         String tagname = unendedTags.pop();
         if (incompleteBeginTag) {
@@ -125,7 +136,7 @@ public class XmlDocument {
     @Override
     public String toString() {
         if (!unendedTags.isEmpty())
-            throw new MalformedXmlDocumentException("Missing end() for " + StringUtil.join(unendedTags, ", "));
+            throw new IllegalStateException("Missing end() for " + StringUtil.join(unendedTags, ", "));
             
         return buffer.toString();
     }
@@ -138,6 +149,26 @@ public class XmlDocument {
         for (T v : values) {
             buffer.append(v);
         }
+    }
+    
+    private <T> boolean isValidIdentifier(T value) {
+        return identifierPattern.matcher(value + "").matches();
+    }
+    
+    private <T> String escape(T value) {
+        String str = (value + "")
+            .replace("&", "&amp;")
+            .replace("\"", "&quot;")
+            .replace("'", "&apos;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;");
+            
+        return str;
+    }
+    
+    private <T> String errorInContext(String format, T...args) {
+        String context = buffer.substring(Math.max(0, buffer.length() - 10));
+        return String.format((context.isEmpty() ? "" : "After \"" + context + "\": ") + format, args);
     }
     
     private void completeBeginTag(boolean shortTag) {
