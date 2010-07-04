@@ -1,0 +1,85 @@
+<project name="frog4j" default="dist" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <!-- PROJECT PROPERTIES -->
+    <property name="project.name" value="${ant.project.name}" />
+    <property name="project.version" value="0.9.1" />
+    <property name="project.jar" value="${project.name}-${project.version}.jar" />
+    <property name="path.src" location="src" />
+    <property name="path.test" location="test" />
+    <property name="path.lib" location="lib" />
+    <property name="path.build" location="build" />
+    <property name="path.build.src" location="${path.build}/src" />
+    <property name="path.build.test" location="${path.build}/test" />
+    <property name="path.dist" location="dist" />
+
+    <!-- IVY PROPERTIES -->
+    <property name="ivy.install.version" value="2.1.0" />
+
+    <condition property="ivy.home" value="${env.IVY_HOME}">
+        <isset property="env.IVY_HOME" />
+    </condition>
+    <property name="ivy.home" value="${user.home}/.ant" />
+    <property name="ivy.jar.dir" value="${ivy.home}/lib" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+    <property name="ivy.lib.dir" value="${path.lib}" />
+
+    <!-- CLASSPATH -->
+    <path id="classpath">
+        <pathelement path="${path.build.test}" />
+        <pathelement path="${path.build.src}" />
+        <fileset dir="${path.lib}" includes="*.jar" />
+        <pathelement path="${java.class.path}" />
+    </path>
+
+    <!-- TARGETS -->
+    <target name="download-ivy" unless="offline">
+        <mkdir dir="${ivy.jar.dir}" />
+        <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.jar.file}" usetimestamp="true" />
+    </target>
+
+    <target name="init-ivy" depends="download-ivy">
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar" />
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
+    </target>
+
+    <target name="resolve" depends="init-ivy">
+        <ivy:retrieve />
+    </target>
+
+    <target name="compile" depends="resolve">
+        <mkdir dir="${path.build.src}" />
+        <mkdir dir="${path.build.test}" />
+        <javac srcdir="${path.src}" destdir="${path.build.src}">
+            <classpath refid="classpath" />
+        </javac>
+        <javac srcdir="${path.test}" destdir="${path.build.test}">
+            <classpath refid="classpath" />
+        </javac>
+    </target>
+
+    <target name="test" depends="compile">
+        <junit printsummary="yes" haltonfailure="yes">
+            <classpath refid="classpath" />
+            <formatter type="plain" usefile="false" />
+            <batchtest fork="yes">
+                <fileset dir="${path.test}">
+                    <include name="**/*Test*.java" />
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="dist" depends="test">
+        <mkdir dir="${path.dist}" />
+        <jar destfile="${path.dist}/${project.jar}" basedir="${path.build.src}" includes="**/*.class" />
+    </target>
+    <target name="clean">
+        <delete dir="${path.build}" />
+    </target>
+
+    <target name="distclean" depends="clean">
+        <delete dir="${path.dist}" />
+    </target>
+</project>
