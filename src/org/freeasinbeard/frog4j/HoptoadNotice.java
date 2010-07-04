@@ -52,21 +52,16 @@ public class HoptoadNotice {
                         .getThrowable()
                         .getStackTrace();
             
-            if (event.locationInformationExists()) {
-                LocationInfo info = event.getLocationInformation();
-                
-                return new StackTraceElement[] {
-                    new StackTraceElement(
-                            info.getClassName(),
-                            info.getMethodName(),
-                            info.getFileName(),
-                            Integer.parseInt(info.getLineNumber())
-                    )
-                };
-            } else {
-                return new StackTraceElement[] { }; // FIXME: the Hoptoad API requires a non-empty backtrace
-            }
-                
+            LocationInfo info = event.getLocationInformation();
+            
+            return new StackTraceElement[] {
+                new StackTraceElement(
+                        info.getClassName(),
+                        info.getMethodName(),
+                        info.getFileName(),
+                        Integer.parseInt(info.getLineNumber())
+                )
+            };
         }
     }
     
