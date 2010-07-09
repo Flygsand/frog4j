@@ -7,12 +7,22 @@ import org.apache.log4j.spi.LoggingEvent;
 public class HoptoadAppender extends AppenderSkeleton {
     
     private HoptoadNotifier notifier;
+    private boolean onlyLogExceptions;
     
     public HoptoadAppender() {
-        notifier = new HoptoadNotifier();
-        setThreshold(Level.ERROR);
+        this(new HoptoadNotifier());
     }
-    
+
+    public HoptoadAppender(HoptoadNotifier notifier) {
+        this.notifier = notifier;
+        setThreshold(Level.ERROR);
+        setOnly_log_exceptions(true);
+    }
+
+    public void setOnly_log_exceptions(boolean bool) {
+        onlyLogExceptions = bool;
+    }
+
     public void setApi_key(String apiKey) {
         notifier.setApiKey(apiKey);
     }
@@ -24,10 +34,10 @@ public class HoptoadAppender extends AppenderSkeleton {
     @Override
     protected void append(LoggingEvent event) {
         try {
-            notifier.notify(event);
-        } catch (Exception e) { 
-            // TODO: log this (avoid recursion)
-        }
+            if (!onlyLogExceptions || event.getThrowableInformation() != null) {
+                notifier.notify(event);
+            }
+        } catch (Exception e) { }
     }
 
     @Override
