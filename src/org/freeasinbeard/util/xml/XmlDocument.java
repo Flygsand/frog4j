@@ -60,7 +60,7 @@ public class XmlDocument {
     }
     
     public XmlDocument() {
-        this(Charset.defaultCharset());
+        this(Charset.forName("UTF-8"));
     }
     
     public XmlDocument begin(String tagName) {
