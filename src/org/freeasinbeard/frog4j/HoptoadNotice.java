@@ -38,7 +38,10 @@ public class HoptoadNotice {
         
         private Error(Object logMsg, Throwable t) {
             klass = t.getClass().getName();
-            message = String.format("%s: %s(\"%s\")", logMsg, klass, t.getMessage());
+            message = String.format("%s: %s", logMsg, klass);
+            if (t.getMessage() != null) {
+            	message = String.format("%s(\"%s\")", message, t.getMessage());
+            }
             backtrace = t.getStackTrace();
         }
         
